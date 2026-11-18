@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/services/" />
+  <Folder Name="/services/monitor-api/">
+    <Project Path="services/monitor-api/UptimeMonitor.Api.Tests/UptimeMonitor.Api.Tests.csproj" />
+    <Project Path="services/monitor-api/UptimeMonitor.Api/UptimeMonitor.Api.csproj" />
+  </Folder>
+</Solution>
