@@ -1,23 +1,23 @@
 using System.Collections.Concurrent;
 using UptimeMonitor.Api.Models;
 
-namespace UptimeMonitor.Api.services;
+namespace UptimeMonitor.Api.Services;
 
 public sealed class MonitorStore
 {
-    private readonly ConcurrentDictionary<Guid, Monitor> _monitors = new();
+    private readonly ConcurrentDictionary<Guid, MonitoredEndpoint> _monitors = new();
 
-    public IReadOnlyCollection<Monitor> GetAll()
+    public IReadOnlyCollection<MonitoredEndpoint> GetAll()
     {
         return _monitors.Values.OrderBy(monitor => monitor.CreatedAt).ToArray();
     }
 
-    public Models.Monitor? GetById(Guid id)
+    public MonitoredEndpoint? GetById(Guid id)
     {
         return _monitors.GetValueOrDefault(id);
     }
 
-    public Models.Monitor Add(Models.Monitor monitor)
+    public MonitoredEndpoint Add(MonitoredEndpoint monitor)
     {
         if (!_monitors.TryAdd(monitor.Id, monitor))
         {

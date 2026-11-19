@@ -1,4 +1,4 @@
-namespace UptimeMonitor.Api.contracts;
+namespace UptimeMonitor.Api.Contracts;
 
 public sealed record CreateMonitorRequest(
     string? Name,
