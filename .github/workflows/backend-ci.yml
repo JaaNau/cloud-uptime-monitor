@@ -32,17 +32,17 @@ jobs:
               run: dotnet --info
 
             - name: Restore dependencies
-              run: dotnet restore UptimeMonitoring.slnx
+              run: dotnet restore UptimeMonitor.slnx
 
             - name: Build solution
               run: >
-                dotnet build UptimeMonitoring.slnx
+                dotnet build UptimeMonitor.slnx
                 --configuration Release
                 --no-restore
 
             - name: Run tests
               run: >
-                dotnet test UptimeMonitoring.slnx
+                dotnet test UptimeMonitor.slnx
                 --configuration Release
                 --no-build
                 --logger "trx;LogFileName=test_results.trx"
