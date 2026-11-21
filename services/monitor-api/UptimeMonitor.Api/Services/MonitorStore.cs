@@ -26,4 +26,22 @@ public sealed class MonitorStore
     }
     return monitor;
   }
+
+  public MonitoredEndpoint? Update(Guid id, Func<MonitoredEndpoint, MonitoredEndpoint> update)
+  {
+    while(_monitors.TryGetValue(id, out var existingMonitor))
+    {
+      var updatedMonitor = update(existingMonitor);
+      if (_monitors.TryUpdate(id, updatedMonitor, existingMonitor))
+      {
+        return updatedMonitor;
+      }
+    }
+    return null;
+  }
+
+  public bool Remove(Guid id)
+  {
+    return _monitors.TryRemove(id, out _);
+  }
 }
