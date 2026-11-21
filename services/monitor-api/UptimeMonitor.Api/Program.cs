@@ -13,8 +13,8 @@ app.UseExceptionHandler();
 
 app.MapGet("/", () => Results.Ok(new
 {
-    service = "uptime-monitor-api",
-    status = "running"
+  service = "uptime-monitor-api",
+  status = "running"
 }));
 
 app.MapHealthChecks("/health");

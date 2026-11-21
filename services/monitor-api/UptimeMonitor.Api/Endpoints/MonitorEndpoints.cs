@@ -78,15 +78,15 @@ public static class MonitorEndpoints
       id,
       existingMonitor => existingMonitor with
       {
-          Name = request.Name!.Trim(),
-          Url = request.Url!.Trim(),
-          IntervalSeconds = request.IntervalSeconds,
-          TimeoutSeconds = request.TimeoutSeconds,
-          ExpectedStatusCode = request.ExpectedStatusCode,
-          Enabled = request.Enabled
+        Name = request.Name!.Trim(),
+        Url = request.Url!.Trim(),
+        IntervalSeconds = request.IntervalSeconds,
+        TimeoutSeconds = request.TimeoutSeconds,
+        ExpectedStatusCode = request.ExpectedStatusCode,
+        Enabled = request.Enabled
       });
 
-      return updatedMonitor is null ? Results.NotFound() : Results.Ok(updatedMonitor);
+    return updatedMonitor is null ? Results.NotFound() : Results.Ok(updatedMonitor);
   }
 
   private static IResult DeleteMonitor(Guid id, MonitorStore store)

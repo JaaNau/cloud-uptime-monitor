@@ -127,4 +127,65 @@ public sealed class MonitorEndpointTests : IClassFixture<WebApplicationFactory<P
 
     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
   }
+
+  [Fact]
+  public async Task UpdateMonitor_ReturnsUpdatedMonitor()
+  {
+    var createRequest = new CreateMonitorRequest(
+        Name: "Original API",
+        Url: "https://original.example.com/health",
+        IntervalSeconds: 60,
+        TimeoutSeconds: 5,
+        ExpectedStatusCode: 200);
+
+    var createResponse = await _client.PostAsJsonAsync("/api/v1/monitors", createRequest);
+
+    var createdMonitor = await createResponse.Content.ReadFromJsonAsync<MonitoredEndpoint>();
+
+    Assert.NotNull(createdMonitor);
+
+    var updateRequest = new UpdateMonitorRequest(
+        Name: "Updated API",
+        Url: "https://updated.example.com/health",
+        IntervalSeconds: 30,
+        TimeoutSeconds: 4,
+        ExpectedStatusCode: 204,
+        Enabled: false);
+
+    var updateResponse = await _client.PutAsJsonAsync($"/api/v1/monitors/{createdMonitor.Id}", updateRequest);
+    Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+
+    var updatedMonitor = await updateResponse.Content.ReadFromJsonAsync<MonitoredEndpoint>();
+    Assert.NotNull(updatedMonitor);
+    Assert.Equal(createdMonitor.Id, updatedMonitor.Id);
+    Assert.Equal("Updated API", updatedMonitor.Name);
+    Assert.Equal("https://updated.example.com/health", updatedMonitor.Url);
+    Assert.Equal(30, updatedMonitor.IntervalSeconds);
+    Assert.Equal(4, updatedMonitor.TimeoutSeconds);
+    Assert.Equal(204, updatedMonitor.ExpectedStatusCode);
+    Assert.False(updatedMonitor.Enabled);
+  }
+
+  [Fact]
+  public async Task UpdateMissingMonitor_returnsNotFound()
+  {
+    var request = new UpdateMonitorRequest(
+      Name: "Missing API",
+      Url: "https://missing.example.com",
+      IntervalSeconds: 60,
+      TimeoutSeconds: 5,
+      ExpectedStatusCode: 200,
+      Enabled: true
+    );
+
+    var response = await _client.PutAsJsonAsync($"/api/v1/monitors/{Guid.NewGuid()}", request);
+    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+  }
+
+  [Fact]
+  public async Task DeleteMissingMonitor_ReturnsNotFound()
+  {
+    var response = await _client.DeleteAsync($"/api/v1/monitors/{Guid.NewGuid()}");
+    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+  }
 }

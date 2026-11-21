@@ -29,7 +29,7 @@ public sealed class MonitorStore
 
   public MonitoredEndpoint? Update(Guid id, Func<MonitoredEndpoint, MonitoredEndpoint> update)
   {
-    while(_monitors.TryGetValue(id, out var existingMonitor))
+    while (_monitors.TryGetValue(id, out var existingMonitor))
     {
       var updatedMonitor = update(existingMonitor);
       if (_monitors.TryUpdate(id, updatedMonitor, existingMonitor))
