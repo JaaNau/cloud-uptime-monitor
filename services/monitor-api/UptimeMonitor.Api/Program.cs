@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using UptimeMonitor.Api.Data;
 using UptimeMonitor.Api.Endpoints;
 using UptimeMonitor.Api.Services;
 
@@ -5,7 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
-builder.Services.AddSingleton<MonitorStore>();
+
+builder.Services.AddDbContext<MonitorDbContext>((serviceProvider, options) =>
+{
+  var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+  var connectionString = configuration.GetConnectionString("MonitorDatabase") 
+  ?? throw new InvalidOperationException("Connection string 'MonitorDatabase' is missing.");
+  options.UseNpgsql(connectionString);
+});
 
 var app = builder.Build();
 
