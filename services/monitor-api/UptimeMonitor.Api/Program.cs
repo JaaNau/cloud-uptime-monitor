@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UptimeMonitor.Api.Data;
 using UptimeMonitor.Api.Endpoints;
-using UptimeMonitor.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using UptimeMonitor.Api.Contracts;
 using UptimeMonitor.Api.Data;
 using UptimeMonitor.Api.Models;
-using UptimeMonitor.Api.Services;
 
 namespace UptimeMonitor.Api.Endpoints;
 
