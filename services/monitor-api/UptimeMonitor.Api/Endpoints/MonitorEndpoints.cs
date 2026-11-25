@@ -31,7 +31,7 @@ public static class MonitorEndpoints
     return Results.Ok(monitors);
   }
 
-  private static async Task <IResult> GetMonitorById(Guid id, MonitorDbContext database, CancellationToken cancellationToken)
+  private static async Task<IResult> GetMonitorById(Guid id, MonitorDbContext database, CancellationToken cancellationToken)
   {
     var monitor = await database.Monitors
     .AsNoTracking()
@@ -55,16 +55,16 @@ public static class MonitorEndpoints
 
     var monitor = new MonitoredEndpoint
     {
-        Id = Guid.NewGuid(),
-        Name = request.Name!.Trim(),
-        Url = request.Url!.Trim(),
-        IntervalSeconds = request.IntervalSeconds,
-        TimeoutSeconds = request.TimeoutSeconds,
-        ExpectedStatusCode = request.ExpectedStatusCode,
-        Enabled = true,
-        Status = "pending",
-        CreatedAt = DateTimeOffset.UtcNow,
-        LastCheckedAt = null
+      Id = Guid.NewGuid(),
+      Name = request.Name!.Trim(),
+      Url = request.Url!.Trim(),
+      IntervalSeconds = request.IntervalSeconds,
+      TimeoutSeconds = request.TimeoutSeconds,
+      ExpectedStatusCode = request.ExpectedStatusCode,
+      Enabled = true,
+      Status = "pending",
+      CreatedAt = DateTimeOffset.UtcNow,
+      LastCheckedAt = null
     };
 
     await database.Monitors.AddAsync(monitor, cancellationToken);
@@ -96,14 +96,14 @@ public static class MonitorEndpoints
     {
       return Results.NotFound();
     }
-      
+
     monitor.Name = request.Name!.Trim();
     monitor.Url = request.Url!.Trim();
     monitor.IntervalSeconds = request.IntervalSeconds;
     monitor.TimeoutSeconds = request.TimeoutSeconds;
     monitor.ExpectedStatusCode = request.ExpectedStatusCode;
     monitor.Enabled = request.Enabled;
-    
+
     await database.SaveChangesAsync(cancellationToken);
 
     return Results.Ok(monitor);
@@ -124,7 +124,7 @@ public static class MonitorEndpoints
     await database.SaveChangesAsync(cancellationToken);
 
     return Results.NoContent();
-    }
+  }
 
   private static Dictionary<string, string[]> ValidateRequest(
     string? name,

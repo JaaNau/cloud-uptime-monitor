@@ -10,7 +10,7 @@ builder.Services.AddHealthChecks();
 builder.Services.AddDbContext<MonitorDbContext>((serviceProvider, options) =>
 {
   var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-  var connectionString = configuration.GetConnectionString("MonitorDatabase") 
+  var connectionString = configuration.GetConnectionString("MonitorDatabase")
   ?? throw new InvalidOperationException("Connection string 'MonitorDatabase' is missing.");
   options.UseNpgsql(connectionString);
 });
