@@ -1,6 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using UptimeMonitor.Api.Contracts;
+using UptimeMonitor.Api.Data;
 using UptimeMonitor.Api.Models;
-using UptimeMonitor.Api.Services;
 
 namespace UptimeMonitor.Api.Endpoints;
 
@@ -20,20 +21,29 @@ public static class MonitorEndpoints
     return endpoints;
   }
 
-  private static IResult GetAllMonitors(MonitorStore store)
+  private static async Task<IResult> GetAllMonitors(MonitorDbContext database, CancellationToken cancellationToken)
   {
-    return Results.Ok(store.GetAll());
+    var monitors = await database.Monitors
+    .AsNoTracking()
+    .OrderBy(monitor => monitor.CreatedAt)
+    .ToListAsync(cancellationToken);
+
+    return Results.Ok(monitors);
   }
 
-  private static IResult GetMonitorById(Guid id, MonitorStore store)
+  private static async Task<IResult> GetMonitorById(Guid id, MonitorDbContext database, CancellationToken cancellationToken)
   {
-    var monitor = store.GetById(id);
+    var monitor = await database.Monitors
+    .AsNoTracking()
+    .SingleOrDefaultAsync(monitor => monitor.Id == id, cancellationToken);
     return monitor is null ? Results.NotFound() : Results.Ok(monitor);
   }
 
-  private static IResult CreateMonitor(CreateMonitorRequest request, MonitorStore store)
+  private static async Task<IResult> CreateMonitor(CreateMonitorRequest request, MonitorDbContext database,
+        CancellationToken cancellationToken)
   {
-    var validationErrors = ValidateRequest(request.Name,
+    var validationErrors = ValidateRequest(
+      request.Name,
       request.Url,
       request.IntervalSeconds,
       request.TimeoutSeconds,
@@ -43,24 +53,31 @@ public static class MonitorEndpoints
       return Results.ValidationProblem(validationErrors);
     }
 
-    var monitor = new MonitoredEndpoint(
-        Id: Guid.NewGuid(),
-        Name: request.Name!.Trim(),
-        Url: request.Url!.Trim(),
-        IntervalSeconds: request.IntervalSeconds,
-        TimeoutSeconds: request.TimeoutSeconds,
-        ExpectedStatusCode: request.ExpectedStatusCode,
-        Enabled: true,
-        Status: "pending",
-        CreatedAt: DateTimeOffset.UtcNow,
-        LastCheckedAt: null);
+    var monitor = new MonitoredEndpoint
+    {
+      Id = Guid.NewGuid(),
+      Name = request.Name!.Trim(),
+      Url = request.Url!.Trim(),
+      IntervalSeconds = request.IntervalSeconds,
+      TimeoutSeconds = request.TimeoutSeconds,
+      ExpectedStatusCode = request.ExpectedStatusCode,
+      Enabled = true,
+      Status = "pending",
+      CreatedAt = DateTimeOffset.UtcNow,
+      LastCheckedAt = null
+    };
 
-    store.Add(monitor);
+    await database.Monitors.AddAsync(monitor, cancellationToken);
+
+    await database.SaveChangesAsync(cancellationToken);
 
     return Results.Created($"/api/v1/monitors/{monitor.Id}", monitor);
   }
 
-  private static IResult UpdateMonitor(Guid id, UpdateMonitorRequest request, MonitorStore store)
+  private static async Task<IResult> UpdateMonitor(Guid id,
+      UpdateMonitorRequest request,
+      MonitorDbContext database,
+      CancellationToken cancellationToken)
   {
     var validationErrors = ValidateRequest(
       request.Name,
@@ -74,27 +91,43 @@ public static class MonitorEndpoints
       return Results.ValidationProblem(validationErrors);
     }
 
-    var updatedMonitor = store.Update(
-      id,
-      existingMonitor => existingMonitor with
-      {
-        Name = request.Name!.Trim(),
-        Url = request.Url!.Trim(),
-        IntervalSeconds = request.IntervalSeconds,
-        TimeoutSeconds = request.TimeoutSeconds,
-        ExpectedStatusCode = request.ExpectedStatusCode,
-        Enabled = request.Enabled
-      });
+    var monitor = await database.Monitors.SingleOrDefaultAsync(monitor => monitor.Id == id, cancellationToken);
+    if (monitor is null)
+    {
+      return Results.NotFound();
+    }
 
-    return updatedMonitor is null ? Results.NotFound() : Results.Ok(updatedMonitor);
+    monitor.Name = request.Name!.Trim();
+    monitor.Url = request.Url!.Trim();
+    monitor.IntervalSeconds = request.IntervalSeconds;
+    monitor.TimeoutSeconds = request.TimeoutSeconds;
+    monitor.ExpectedStatusCode = request.ExpectedStatusCode;
+    monitor.Enabled = request.Enabled;
+
+    await database.SaveChangesAsync(cancellationToken);
+
+    return Results.Ok(monitor);
   }
 
-  private static IResult DeleteMonitor(Guid id, MonitorStore store)
+  private static async Task<IResult> DeleteMonitor(Guid id, MonitorDbContext database,
+        CancellationToken cancellationToken)
   {
-    return store.Remove(id) ? Results.NoContent() : Results.NotFound();
+    var monitor = await database.Monitors.SingleOrDefaultAsync(
+    monitor => monitor.Id == id, cancellationToken);
+
+    if (monitor is null)
+    {
+      return Results.NotFound();
+    }
+
+    database.Monitors.Remove(monitor);
+    await database.SaveChangesAsync(cancellationToken);
+
+    return Results.NoContent();
   }
 
-  private static Dictionary<string, string[]> ValidateRequest(string? name,
+  private static Dictionary<string, string[]> ValidateRequest(
+    string? name,
     string? url,
     int intervalSeconds,
     int timeoutSeconds,

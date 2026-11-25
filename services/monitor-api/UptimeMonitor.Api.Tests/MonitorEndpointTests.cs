@@ -6,11 +6,11 @@ using UptimeMonitor.Api.Models;
 
 namespace UptimeMonitor.Api.Tests;
 
-public sealed class MonitorEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class MonitorEndpointTests : IClassFixture<MonitorApiFactory>
 {
   private readonly HttpClient _client;
 
-  public MonitorEndpointTests(WebApplicationFactory<Program> factory)
+  public MonitorEndpointTests(MonitorApiFactory factory)
   {
     _client = factory.CreateClient();
   }
