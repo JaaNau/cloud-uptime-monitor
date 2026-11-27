@@ -12,4 +12,8 @@ public sealed class MonitoredEndpoint
   public string Status { get; set; } = "pending";
   public DateTimeOffset CreatedAt { get; set; }
   public DateTimeOffset? LastCheckedAt { get; set; }
+  public int ConsecutiveSuccesses { get; set; }
+  public int ConsecutiveFailures { get; set; }
+
+  public ICollection<CheckResult> CheckResults { get; set; } = new List<CheckResult>();
 }
