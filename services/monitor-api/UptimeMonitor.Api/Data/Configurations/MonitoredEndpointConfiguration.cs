@@ -18,11 +18,21 @@ public sealed class MonitoredEndpointConfguration : IEntityTypeConfiguration<Mon
     builder.Property(monitor => monitor.TimeoutSeconds).HasColumnName("timeout_seconds").IsRequired();
     builder.Property(monitor => monitor.ExpectedStatusCode).HasColumnName("expected_status_code").IsRequired();
     builder.Property(monitor => monitor.Enabled).HasColumnName("enabled").IsRequired();
-    builder.Property(monitor => monitor.Status).HasColumnName("status").HasMaxLength(20).IsRequired();
+    builder.Property(monitor => monitor.Status).HasColumnName("status").HasMaxLength(20).HasDefaultValue("pending").IsRequired();
     builder.Property(monitor => monitor.CreatedAt).HasColumnName("created_at").IsRequired();
     builder.Property(monitor => monitor.LastCheckedAt).HasColumnName("last_checked_at");
 
     builder.HasIndex(monitor => monitor.CreatedAt);
     builder.HasIndex(monitor => monitor.Enabled);
+
+    builder.Property(monitor => monitor.ConsecutiveSuccesses)
+    .HasColumnName("consecutive_successes")
+    .HasDefaultValue(0)
+    .IsRequired();
+
+    builder.Property(monitor => monitor.ConsecutiveFailures)
+    .HasColumnName("consecutive_failures")
+    .HasDefaultValue(0)
+    .IsRequired();
   }
 }

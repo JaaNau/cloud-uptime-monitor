@@ -31,8 +31,8 @@ public sealed class MonitorApiFactory : WebApplicationFactory<Program>
       services.AddDbContext<MonitorDbContext>(
               options =>
               {
-              options.UseInMemoryDatabase(_databaseName);
-            });
+                options.UseInMemoryDatabase(_databaseName);
+              });
 
       using var serviceProvider =
               services.BuildServiceProvider();
